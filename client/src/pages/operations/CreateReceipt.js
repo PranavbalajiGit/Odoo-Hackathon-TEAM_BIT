@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 
 const CreateReceipt = () => {
   const navigate = useNavigate();
-  const { products, addReceipt } = useInventory();
+  const { products = [], addReceipt } = useInventory();
   const [supplier, setSupplier] = useState('');
   const [items, setItems] = useState([{ productId: '', productName: '', quantity: 0, unitPrice: 0 }]);
 
@@ -23,9 +23,9 @@ const CreateReceipt = () => {
     newItems[index][field] = value;
     
     if (field === 'productId') {
-      const product = products.find(p => p.id === value);
+      const product = (products || []).find(p => p.id === value);
       if (product) {
-        newItems[index].productName = product.name;
+        newItems[index].productName = product.name || '';
       }
     }
     
@@ -114,7 +114,7 @@ const CreateReceipt = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   >
                     <option value="">Select product</option>
-                    {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
+                    {(products || []).map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
                   </select>
                 </div>
                 <div className="col-span-2">

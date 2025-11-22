@@ -6,17 +6,17 @@ import { ArrowLeft } from 'lucide-react';
 
 const CreateAdjustment = () => {
   const navigate = useNavigate();
-  const { products, warehouses, addAdjustment } = useInventory();
+  const { products = [], warehouses = [], addAdjustment } = useInventory();
   const [productId, setProductId] = useState('');
   const [location, setLocation] = useState('');
   const [countedQuantity, setCountedQuantity] = useState(0);
   const [reason, setReason] = useState('');
 
-  const locations = warehouses.flatMap(w => 
-    w.locations.map(l => `${w.name} - ${l.name}`)
+  const locations = (warehouses || []).flatMap(w => 
+    (w.locations || []).map(l => `${w.name} - ${l.name}`)
   );
 
-  const selectedProduct = products.find(p => p.id === productId);
+  const selectedProduct = (products || []).find(p => p.id === productId);
   const recordedStock = selectedProduct?.stock || 0;
   const difference = countedQuantity - recordedStock;
 
@@ -27,9 +27,14 @@ const CreateAdjustment = () => {
       return;
     }
     
+    if (!selectedProduct) {
+      toast.error('Selected product not found');
+      return;
+    }
+    
     addAdjustment({
       productId,
-      productName: selectedProduct.name,
+      productName: selectedProduct.name || 'Unknown Product',
       location,
       recordedStock,
       countedQuantity: parseInt(countedQuantity),
@@ -64,7 +69,7 @@ const CreateAdjustment = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
               >
                 <option value="">Select product</option>
-                {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
+                {(products || []).map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
               </select>
             </div>
 
@@ -84,7 +89,7 @@ const CreateAdjustment = () => {
 
           {selectedProduct && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-900">Recorded Stock: <span className="text-2xl font-bold">{recordedStock}</span> {selectedProduct.unit}</p>
+              <p className="text-sm font-medium text-blue-900">Recorded Stock: <span className="text-2xl font-bold">{recordedStock}</span> {selectedProduct.uom || selectedProduct.unit || 'units'}</p>
             </div>
           )}
 
@@ -104,7 +109,7 @@ const CreateAdjustment = () => {
           {selectedProduct && countedQuantity !== '' && (
             <div className={`p-4 rounded-lg border ${difference < 0 ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
               <p className={`text-sm font-semibold ${difference < 0 ? 'text-red-900' : 'text-emerald-900'}`}>
-                Difference: <span className="text-2xl">{difference > 0 ? '+' : ''}{difference}</span> {selectedProduct.unit}
+                Difference: <span className="text-2xl">{difference > 0 ? '+' : ''}{difference}</span> {selectedProduct.uom || selectedProduct.unit || 'units'}
               </p>
             </div>
           )}

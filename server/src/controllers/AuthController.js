@@ -26,10 +26,18 @@ class AuthController {
         return res.status(400).json({ error: 'Login ID or email already exists' });
       }
 
-      const user = await User.create({ loginId, email, passwordHash: password });
+      const user = await User.create({ loginId, email, passwordHash: password }); // passwordHash will be hashed by User.beforeCreate hook
       const token = jwt.sign({ id: user.id, loginId: user.loginId, email: user.email, role: user.role }, process.env.JWT_SECRET);
 
-      res.status(201).json({ token });
+      res.status(201).json({ 
+        token,
+        user: {
+          id: user.id,
+          loginId: user.loginId,
+          email: user.email,
+          role: user.role,
+        }
+      });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -47,7 +55,15 @@ class AuthController {
       }
 
       const token = jwt.sign({ id: user.id, loginId: user.loginId, email: user.email, role: user.role }, process.env.JWT_SECRET);
-      res.json({ token });
+      res.json({ 
+        token,
+        user: {
+          id: user.id,
+          loginId: user.loginId,
+          email: user.email,
+          role: user.role,
+        }
+      });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

@@ -5,7 +5,7 @@ const SequenceService = require('../services/SequenceService');
 
 const operationCreateSchema = z.object({
   warehouseId: z.number().int().positive(),
-  type: z.enum(['RECEIPT', 'DELIVERY', 'ADJUSTMENT']),
+  type: z.enum(['RECEIPT', 'DELIVERY', 'ADJUSTMENT', 'TRANSFER']),
   fromLocationId: z.number().int().positive().optional(),
   toLocationId: z.number().int().positive().optional(),
   scheduledAt: z.string().datetime(),

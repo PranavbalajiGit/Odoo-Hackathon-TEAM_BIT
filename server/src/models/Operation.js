@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
     },
     type: {
-      type: DataTypes.ENUM('RECEIPT', 'DELIVERY', 'ADJUSTMENT'),
+      type: DataTypes.ENUM('RECEIPT', 'DELIVERY', 'ADJUSTMENT', 'TRANSFER'),
       allowNull: false,
     },
     fromLocationId: {

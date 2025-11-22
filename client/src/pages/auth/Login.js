@@ -23,7 +23,8 @@ const Login = () => {
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Login failed. Please try again.');
+      const errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -45,14 +46,14 @@ const Login = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Login ID or Email</label>
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 data-testid="email-input"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                placeholder="you@company.com"
+                placeholder="user123 or you@company.com"
               />
             </div>
 

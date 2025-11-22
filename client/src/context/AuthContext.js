@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -17,50 +18,75 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is logged in (from localStorage)
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('token');
+    if (storedUser && storedToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = (email, password) => {
-    // Mock login - in real app, this would call an API
-    const mockUser = {
-      id: '1',
-      email: email,
-      name: 'John Doe',
-      role: 'Admin'
-    };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    return Promise.resolve(mockUser);
+  const login = async (loginIdOrEmail, password) => {
+    try {
+      const response = await authAPI.login({
+        loginIdOrEmail,
+        password,
+      });
+      
+      const { token, user: userData } = response.data;
+      
+      // Store token and user
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || 'Login failed';
+      throw new Error(errorMessage);
+    }
   };
 
-  const signup = (name, email, password) => {
-    // Mock signup
-    const mockUser = {
-      id: Date.now().toString(),
-      email: email,
-      name: name,
-      role: 'User'
-    };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    return Promise.resolve(mockUser);
+  const signup = async (loginId, email, password) => {
+    try {
+      const response = await authAPI.signup({
+        loginId,
+        email,
+        password,
+      });
+      
+      const { token, user: userData } = response.data;
+      
+      // Store token and user
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || 'Signup failed';
+      throw new Error(errorMessage);
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
-  const resetPassword = (email) => {
-    // Mock password reset
+  const resetPassword = async (email) => {
+    // TODO: Implement when backend endpoint is available
     return Promise.resolve({ success: true });
   };
 
-  const verifyOTP = (otp) => {
-    // Mock OTP verification
+  const verifyOTP = async (otp) => {
+    // TODO: Implement when backend endpoint is available
     return Promise.resolve({ success: true });
   };
 

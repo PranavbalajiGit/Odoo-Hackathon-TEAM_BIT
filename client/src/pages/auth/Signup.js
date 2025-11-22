@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Package } from 'lucide-react';
 
 const Signup = () => {
-  const [name, setName] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -13,10 +13,38 @@ const Signup = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
 
+  const validatePassword = (pwd) => {
+    if (pwd.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    if (!/[a-z]/.test(pwd)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!/[A-Z]/.test(pwd)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!/\d/.test(pwd)) {
+      return 'Password must contain at least one number';
+    }
+    if (!/[@$!%*?&]/.test(pwd)) {
+      return 'Password must contain at least one special character (@$!%*?&)';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password || !confirmPassword) {
+    if (!loginId || !email || !password || !confirmPassword) {
       toast.error('Please fill in all fields');
+      return;
+    }
+    if (loginId.length < 6 || loginId.length > 12) {
+      toast.error('Login ID must be between 6 and 12 characters');
+      return;
+    }
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
     if (password !== confirmPassword) {
@@ -25,11 +53,12 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      await signup(name, email, password);
+      await signup(loginId, email, password);
       toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Signup failed. Please try again.');
+      const errorMessage = error.message || 'Signup failed. Please check your input and try again.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -51,14 +80,16 @@ const Signup = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} data-testid="signup-form" className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Login ID (6-12 characters)</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                data-testid="name-input"
+                value={loginId}
+                onChange={(e) => setLoginId(e.target.value)}
+                data-testid="loginId-input"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                placeholder="John Doe"
+                placeholder="user123"
+                minLength={6}
+                maxLength={12}
               />
             </div>
 
@@ -84,6 +115,9 @@ const Signup = () => {
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 placeholder="••••••••"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Must contain: 8+ chars, uppercase, lowercase, number, special char (@$!%*?&)
+              </p>
             </div>
 
             <div>

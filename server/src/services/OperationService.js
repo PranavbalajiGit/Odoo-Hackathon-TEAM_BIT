@@ -53,6 +53,23 @@ class OperationService {
 
       if (operation.type === 'DELIVERY') {
         await this.reserveForDelivery(operation, transaction);
+      } else if (operation.type === 'TRANSFER') {
+        // Check stock availability for transfers
+        for (const line of operation.lines) {
+          const quant = await StockQuant.findOne({
+            where: {
+              warehouseId: operation.warehouseId,
+              locationId: operation.fromLocationId,
+              productId: line.productId,
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+          });
+
+          if (!quant || quant.getFreeToUse() < line.quantity) {
+            throw new Error(`Insufficient stock for transfer - product ${line.productId}`);
+          }
+        }
       }
 
       operation.status = 'READY';
@@ -126,52 +143,112 @@ class OperationService {
   }
 
   static async processLine(operation, line, transaction) {
-    let locationId, delta;
+    let fromLocationId, toLocationId, delta;
+    
     if (operation.type === 'RECEIPT') {
-      locationId = operation.toLocationId;
+      toLocationId = operation.toLocationId;
       delta = line.quantity;
+      // Increase stock at toLocation
+      const quant = await StockQuant.findOrCreate({
+        where: {
+          warehouseId: operation.warehouseId,
+          locationId: toLocationId,
+          productId: line.productId,
+        },
+        defaults: {
+          onHand: 0,
+          reserved: 0,
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      quant.onHand += delta;
+      if (quant.onHand < 0) throw new Error('Cannot reduce stock below 0');
+      await quant.save({ transaction });
     } else if (operation.type === 'DELIVERY') {
-      locationId = operation.fromLocationId;
+      fromLocationId = operation.fromLocationId;
       delta = -line.quantity;
-    } else if (operation.type === 'ADJUSTMENT') {
-      locationId = operation.fromLocationId; // assuming fromLocationId == toLocationId
-      delta = operation.reference.includes('ADJ') ? line.quantity : -line.quantity; // but need to handle sign
-      // For simplicity, assume positive for increase, but prompt says can be negative
-      // Here, quantity is always positive, but for adjustment, if negative delta, need to check
-      // For now, assume adjustment delta is in line.quantity, but prompt says quantity >0, delta can be +/-
-      // To simplify, let's assume for adjustment, quantity can be negative
-      delta = line.quantity; // allow negative
-    }
-
-    const quant = await StockQuant.findOrCreate({
-      where: {
-        warehouseId: operation.warehouseId,
-        locationId,
-        productId: line.productId,
-      },
-      defaults: {
-        onHand: 0,
-        reserved: 0,
-      },
-      transaction,
-      lock: transaction.LOCK.UPDATE,
-    });
-
-    if (operation.type === 'DELIVERY') {
+      // Decrease stock at fromLocation (reserved was already deducted)
+      const quant = await StockQuant.findOne({
+        where: {
+          warehouseId: operation.warehouseId,
+          locationId: fromLocationId,
+          productId: line.productId,
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      if (!quant || quant.onHand < line.quantity) {
+        throw new Error('Insufficient stock');
+      }
       quant.reserved -= line.quantity;
       quant.onHand -= line.quantity;
-    } else {
+      if (quant.onHand < 0) throw new Error('Cannot reduce stock below 0');
+      await quant.save({ transaction });
+    } else if (operation.type === 'ADJUSTMENT') {
+      const locationId = operation.toLocationId || operation.fromLocationId;
+      delta = line.quantity; // Can be positive or negative
+      const quant = await StockQuant.findOrCreate({
+        where: {
+          warehouseId: operation.warehouseId,
+          locationId,
+          productId: line.productId,
+        },
+        defaults: {
+          onHand: 0,
+          reserved: 0,
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
       quant.onHand += delta;
+      if (quant.onHand < 0) throw new Error('Cannot reduce stock below 0');
+      await quant.save({ transaction });
+    } else if (operation.type === 'TRANSFER') {
+      fromLocationId = operation.fromLocationId;
+      toLocationId = operation.toLocationId;
+      // Decrease from source, increase at destination
+      const fromQuant = await StockQuant.findOne({
+        where: {
+          warehouseId: operation.warehouseId,
+          locationId: fromLocationId,
+          productId: line.productId,
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      if (!fromQuant || fromQuant.getFreeToUse() < line.quantity) {
+        throw new Error(`Insufficient stock at source location for product ${line.productId}`);
+      }
+      
+      const toQuant = await StockQuant.findOrCreate({
+        where: {
+          warehouseId: operation.warehouseId,
+          locationId: toLocationId,
+          productId: line.productId,
+        },
+        defaults: {
+          onHand: 0,
+          reserved: 0,
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      
+      fromQuant.onHand -= line.quantity;
+      toQuant.onHand += line.quantity;
+      
+      if (fromQuant.onHand < 0) throw new Error('Cannot reduce stock below 0');
+      
+      await fromQuant.save({ transaction });
+      await toQuant.save({ transaction });
     }
-
-    if (quant.onHand < 0) throw new Error('Cannot reduce stock below 0');
-
-    await quant.save({ transaction });
   }
 
   static getSignedQty(type, qty) {
     if (type === 'RECEIPT') return qty;
     if (type === 'DELIVERY') return -qty;
+    if (type === 'TRANSFER') return qty; // Transfer moves stock but doesn't change total
     return qty; // adjustment
   }
 

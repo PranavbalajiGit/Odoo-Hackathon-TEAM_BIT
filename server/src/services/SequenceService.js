@@ -26,6 +26,7 @@ class SequenceService {
       RECEIPT: 'IN',
       DELIVERY: 'OUT',
       ADJUSTMENT: 'ADJ',
+      TRANSFER: 'TRF',
     };
     return `${warehouseShortCode}/${typeMap[type]}/${String(number).padStart(4, '0')}`;
   }

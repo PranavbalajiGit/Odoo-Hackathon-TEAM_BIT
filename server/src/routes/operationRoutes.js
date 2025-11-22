@@ -26,7 +26,7 @@ router.use(auth);
  *         name: type
  *         schema:
  *           type: string
- *           enum: [RECEIPT, DELIVERY, ADJUSTMENT]
+ *           enum: [RECEIPT, DELIVERY, ADJUSTMENT, TRANSFER]
  *       - in: query
  *         name: status
  *         schema:
@@ -67,26 +67,51 @@ router.use(auth);
  *               - scheduledAt
  *               - lines
  *             properties:
- *               warehouseId: { type: 'integer', example: 1 }
- *               type: { type: 'string', enum: ['RECEIPT', 'DELIVERY', 'ADJUSTMENT'], example: 'RECEIPT' }
- *               fromLocationId: { type: 'integer', example: null }
- *               toLocationId: { type: 'integer', example: 1 }
- *               scheduledAt: { type: 'string', format: 'date-time', example: '2023-11-22T10:00:00Z' }
- *               fromParty: { type: 'string', example: 'Acme Interior' }
- *               toParty: { type: 'string', example: null }
- *               note: { type: 'string', example: 'Receipt note' }
- *               lines: {
- *                 type: 'array',
- *                 items: {
- *                   type: 'object',
+ *               warehouseId:
+ *                 type: integer
+ *                 example: 1
+ *               type:
+ *                 type: string
+ *                 enum: [RECEIPT, DELIVERY, ADJUSTMENT, TRANSFER]
+ *                 example: RECEIPT
+ *               fromLocationId:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: null
+ *               toLocationId:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 1
+ *               scheduledAt:
+ *                 type: string
+ *                 format: date-time
+ *                 example: '2023-11-22T10:00:00Z'
+ *               fromParty:
+ *                 type: string
+ *                 nullable: true
+ *                 example: 'Acme Interior'
+ *               toParty:
+ *                 type: string
+ *                 nullable: true
+ *                 example: null
+ *               note:
+ *                 type: string
+ *                 nullable: true
+ *                 example: 'Receipt note'
+ *               lines:
+ *                 type: array
+ *                 items:
+ *                   type: object
  *                   required:
  *                     - productId
  *                     - quantity
  *                   properties:
- *                     productId: { type: 'integer', example: 1 }
- *                     quantity: { type: 'integer', example: 10 }
- *                 }
- *               }
+ *                     productId:
+ *                       type: integer
+ *                       example: 1
+ *                     quantity:
+ *                       type: integer
+ *                       example: 10
  *     responses:
  *       201:
  *         description: Operation created
@@ -135,21 +160,33 @@ router.post('/', OperationController.create);
  *           schema:
  *             type: object
  *             properties:
- *               fromLocationId: { type: 'integer' }
- *               toLocationId: { type: 'integer' }
- *               scheduledAt: { type: 'string', format: 'date-time' }
- *               fromParty: { type: 'string' }
- *               toParty: { type: 'string' }
- *               note: { type: 'string' }
- *               lines: {
- *                 type: 'array',
- *                 items: {
- *                   type: 'object',
+ *               fromLocationId:
+ *                 type: integer
+ *                 nullable: true
+ *               toLocationId:
+ *                 type: integer
+ *                 nullable: true
+ *               scheduledAt:
+ *                 type: string
+ *                 format: date-time
+ *               fromParty:
+ *                 type: string
+ *                 nullable: true
+ *               toParty:
+ *                 type: string
+ *                 nullable: true
+ *               note:
+ *                 type: string
+ *                 nullable: true
+ *               lines:
+ *                 type: array
+ *                 items:
+ *                   type: object
  *                   properties:
- *                     productId: { type: 'integer' }
- *                     quantity: { type: 'integer' }
- *                 }
- *               }
+ *                     productId:
+ *                       type: integer
+ *                     quantity:
+ *                       type: integer
  *     responses:
  *       200:
  *         description: Operation updated

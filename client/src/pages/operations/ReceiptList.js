@@ -32,7 +32,6 @@ const ReceiptList = () => {
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="card mb-6">
         <select
           value={statusFilter}
@@ -48,7 +47,6 @@ const ReceiptList = () => {
         </select>
       </div>
 
-      {/* Receipts Table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">

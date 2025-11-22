@@ -8,7 +8,6 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [docTypeFilter, setDocTypeFilter] = useState('all');
 
-  // Calculate KPIs
   const totalProducts = products.reduce((sum, p) => sum + p.stock, 0);
   const lowStockItems = products.filter(p => p.stock <= p.reorderLevel).length;
   const pendingReceipts = receipts.filter(r => r.status === 'waiting' || r.status === 'ready').length;
@@ -23,7 +22,6 @@ const Dashboard = () => {
     { label: 'Internal Transfers Scheduled', value: scheduledTransfers, icon: ArrowLeftRight, color: 'purple', testId: 'kpi-scheduled-transfers' },
   ];
 
-  // Recent activities
   const recentActivities = [
     ...receipts.slice(0, 3).map(r => ({ ...r, type: 'Receipt' })),
     ...deliveries.slice(0, 3).map(d => ({ ...d, type: 'Delivery' })),
@@ -32,13 +30,11 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in" data-testid="dashboard-page">
-      {/* Page Header */}
       <div className="page-header">
         <h1 className="page-title">Dashboard Overview</h1>
         <p className="page-subtitle">Monitor your inventory operations at a glance</p>
       </div>
 
-      {/* Filters */}
       <div className="card mb-6">
         <div className="flex flex-wrap gap-4">
           <div>
@@ -68,7 +64,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
@@ -88,9 +83,8 @@ const Dashboard = () => {
         })}
       </div>
 
-      {/* Recent Activities & Low Stock Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activities */}
+      
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Space Grotesk' }}>Recent Activities</h3>
           <div className="space-y-3">
@@ -108,8 +102,6 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-
-        {/* Low Stock Alerts */}
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Space Grotesk' }}>Low Stock Alerts</h3>
           <div className="space-y-3">

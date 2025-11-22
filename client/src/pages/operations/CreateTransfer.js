@@ -78,7 +78,7 @@ const CreateTransfer = () => {
       </div>
 
       <form onSubmit={handleSubmit} data-testid="create-transfer-form" className="max-w-4xl space-y-6">
-        {/* Location Info */}
+       
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Space Grotesk' }}>Transfer Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -109,7 +109,7 @@ const CreateTransfer = () => {
           </div>
         </div>
 
-        {/* Items */}
+   
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Space Grotesk' }}>Items to Transfer</h3>
@@ -167,7 +167,6 @@ const CreateTransfer = () => {
           </div>
         </div>
 
-        {/* Submit */}
         <div className="flex items-center justify-end space-x-4">
           <button
             type="button"

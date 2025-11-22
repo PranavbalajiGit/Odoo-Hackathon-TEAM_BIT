@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in (from localStorage)
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
     if (storedUser && storedToken) {
@@ -31,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+<<<<<<< HEAD
   const login = async (loginIdOrEmail, password) => {
     try {
       const response = await authAPI.login({
@@ -50,6 +50,18 @@ export const AuthProvider = ({ children }) => {
       const errorMessage = error.response?.data?.error || error.message || 'Login failed';
       throw new Error(errorMessage);
     }
+=======
+  const login = (email, password) => {
+    const mockUser = {
+      id: '1',
+      email: email,
+      name: 'John Doe',
+      role: 'Admin'
+    };
+    setUser(mockUser);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    return Promise.resolve(mockUser);
+>>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
   };
 
   const signup = async (loginId, email, password) => {

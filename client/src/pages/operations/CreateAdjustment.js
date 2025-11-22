@@ -122,7 +122,6 @@ const CreateAdjustment = () => {
           </div>
         </div>
 
-        {/* Submit */}
         <div className="flex items-center justify-end space-x-4">
           <button
             type="button"

@@ -68,7 +68,7 @@ const Signup = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-emerald-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          {/* Logo */}
+  
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-2xl mb-4">
               <Package className="w-8 h-8 text-white" />
@@ -77,7 +77,7 @@ const Signup = () => {
             <p className="text-sm text-gray-500 mt-1">Start managing your inventory today</p>
           </div>
 
-          {/* Form */}
+    
           <form onSubmit={handleSubmit} data-testid="signup-form" className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Login ID (6-12 characters)</label>
@@ -142,7 +142,6 @@ const Signup = () => {
             </button>
           </form>
 
-          {/* Sign In Link */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Already have an account?{' '}
             <Link to="/login" data-testid="login-link" className="text-cyan-600 hover:text-cyan-700 font-medium">

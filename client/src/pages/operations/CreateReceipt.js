@@ -88,7 +88,6 @@ const CreateReceipt = () => {
           </div>
         </div>
 
-        {/* Items */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Space Grotesk' }}>Items</h3>

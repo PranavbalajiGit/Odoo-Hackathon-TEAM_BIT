@@ -68,7 +68,7 @@ const CreateDelivery = () => {
       </div>
 
       <form onSubmit={handleSubmit} data-testid="create-delivery-form" className="max-w-4xl space-y-6">
-        {/* Customer Info */}
+ 
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Space Grotesk' }}>Customer Information</h3>
           <div>
@@ -84,7 +84,6 @@ const CreateDelivery = () => {
           </div>
         </div>
 
-        {/* Items */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900" style={{ fontFamily: 'Space Grotesk' }}>Items</h3>
@@ -142,7 +141,7 @@ const CreateDelivery = () => {
           </div>
         </div>
 
-        {/* Submit */}
+
         <div className="flex items-center justify-end space-x-4">
           <button
             type="button"

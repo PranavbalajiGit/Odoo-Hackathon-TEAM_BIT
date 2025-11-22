@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Package, ArrowLeft } from 'lucide-react';
 
 const ResetPassword = () => {
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -90,7 +90,6 @@ const ResetPassword = () => {
             </p>
           </div>
 
-          {/* Step 1: Email */}
           {step === 1 && (
             <form onSubmit={handleEmailSubmit} data-testid="email-form" className="space-y-5">
               <div>
@@ -115,7 +114,6 @@ const ResetPassword = () => {
             </form>
           )}
 
-          {/* Step 2: OTP */}
           {step === 2 && (
             <form onSubmit={handleOTPSubmit} data-testid="otp-form" className="space-y-5">
               <div>
@@ -141,7 +139,6 @@ const ResetPassword = () => {
             </form>
           )}
 
-          {/* Step 3: New Password */}
           {step === 3 && (
             <form onSubmit={handlePasswordSubmit} data-testid="password-form" className="space-y-5">
               <div>
@@ -177,7 +174,6 @@ const ResetPassword = () => {
             </form>
           )}
 
-          {/* Back to Login */}
           <Link to="/login" data-testid="back-to-login" className="flex items-center justify-center text-sm text-gray-600 hover:text-cyan-600 mt-6">
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to Login

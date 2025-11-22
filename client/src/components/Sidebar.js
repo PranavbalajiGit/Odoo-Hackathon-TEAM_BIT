@@ -34,12 +34,10 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col" data-testid="sidebar">
-      {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-cyan-600" style={{ fontFamily: 'Space Grotesk' }}>StockMaster</h1>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4">
         <div className="px-3 space-y-1">
           {menuItems.map((item) => {
@@ -95,7 +93,6 @@ const Sidebar = () => {
             )}
           </div>
 
-          {/* Settings Section */}
           <div className="pt-4">
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
@@ -131,7 +128,6 @@ const Sidebar = () => {
         </div>
       </nav>
 
-      {/* Profile Section */}
       <div className="border-t border-gray-200 p-4">
         <div className="space-y-1">
           <Link

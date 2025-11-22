@@ -20,7 +20,6 @@ export const InventoryProvider = ({ children }) => {
   const [warehouses, setWarehouses] = useState(generateMockWarehouses());
   const [moveHistory, setMoveHistory] = useState(generateMockMoveHistory());
 
-  // Product operations
   const addProduct = (product) => {
     const newProduct = {
       ...product,
@@ -39,7 +38,6 @@ export const InventoryProvider = ({ children }) => {
     setProducts(products.filter(p => p.id !== id));
   };
 
-  // Receipt operations
   const addReceipt = (receipt) => {
     const newReceipt = {
       ...receipt,
@@ -58,16 +56,13 @@ export const InventoryProvider = ({ children }) => {
   const validateReceipt = (id) => {
     const receipt = receipts.find(r => r.id === id);
     if (receipt) {
-      // Update stock
       receipt.items.forEach(item => {
         const product = products.find(p => p.id === item.productId);
         if (product) {
           updateProduct(product.id, { stock: product.stock + item.quantity });
         }
       });
-      // Update receipt status
       updateReceipt(id, { status: 'done', validatedAt: new Date().toISOString() });
-      // Add to move history
       addMoveHistory({
         type: 'receipt',
         referenceId: id,
@@ -76,7 +71,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  // Delivery operations
   const addDelivery = (delivery) => {
     const newDelivery = {
       ...delivery,
@@ -95,7 +89,6 @@ export const InventoryProvider = ({ children }) => {
   const validateDelivery = (id) => {
     const delivery = deliveries.find(d => d.id === id);
     if (delivery) {
-      // Update stock
       delivery.items.forEach(item => {
         const product = products.find(p => p.id === item.productId);
         if (product) {
@@ -111,7 +104,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  // Transfer operations
   const addTransfer = (transfer) => {
     const newTransfer = {
       ...transfer,
@@ -141,7 +133,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  // Adjustment operations
   const addAdjustment = (adjustment) => {
     const newAdjustment = {
       ...adjustment,
@@ -174,7 +165,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  // Warehouse operations
   const addWarehouse = (warehouse) => {
     const newWarehouse = {
       ...warehouse,
@@ -193,7 +183,6 @@ export const InventoryProvider = ({ children }) => {
     setWarehouses(warehouses.filter(w => w.id !== id));
   };
 
-  // Move history
   const addMoveHistory = (move) => {
     const newMove = {
       ...move,

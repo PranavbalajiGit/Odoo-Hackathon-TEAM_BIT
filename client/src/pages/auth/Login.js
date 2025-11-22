@@ -42,7 +42,7 @@ const Login = () => {
             <p className="text-sm text-gray-500 mt-1">Sign in to manage your inventory</p>
           </div>
 
-          {/* Form */}
+  
           <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
@@ -88,7 +88,6 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Sign Up Link */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Don't have an account?{' '}
             <Link to="/signup" data-testid="signup-link" className="text-cyan-600 hover:text-cyan-700 font-medium">

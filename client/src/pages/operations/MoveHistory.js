@@ -21,7 +21,7 @@ const MoveHistory = () => {
         <p className="page-subtitle">Track all stock movements</p>
       </div>
 
-      {/* Filters */}
+
       <div className="card mb-6">
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[200px]">
@@ -51,7 +51,7 @@ const MoveHistory = () => {
         </div>
       </div>
 
-      {/* Move History Table */}
+
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">

@@ -32,7 +32,6 @@ const TransferList = () => {
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="card mb-6">
         <select
           value={statusFilter}
@@ -47,7 +46,6 @@ const TransferList = () => {
         </select>
       </div>
 
-      {/* Transfers Table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">

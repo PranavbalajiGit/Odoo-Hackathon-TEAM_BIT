@@ -13,7 +13,6 @@ const MyProfile = () => {
 
       <div className="max-w-3xl">
         <div className="card">
-          {/* Profile Header */}
           <div className="flex items-center pb-6 border-b border-gray-200 mb-6">
             <div className="w-20 h-20 bg-gradient-to-br from-cyan-400 to-emerald-400 rounded-full flex items-center justify-center text-white text-3xl font-bold">
               {user?.name?.charAt(0).toUpperCase()}
@@ -24,7 +23,6 @@ const MyProfile = () => {
             </div>
           </div>
 
-          {/* Profile Details */}
           <div className="space-y-6">
             <div className="flex items-start">
               <User className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />

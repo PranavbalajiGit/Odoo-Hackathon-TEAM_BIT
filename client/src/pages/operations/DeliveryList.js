@@ -5,12 +5,23 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 const DeliveryList = () => {
-  const { deliveries, validateDelivery } = useInventory();
+  const { deliveries, validateDelivery, loading } = useInventory();
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredDeliveries = deliveries.filter(d =>
-    statusFilter === 'all' || d.status === statusFilter
-  );
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
+      </div>
+    );
+  }
+
+  const deliveriesList = deliveries || [];
+  const filteredDeliveries = deliveriesList.filter(d => {
+    if (!d) return false;
+    const status = d.status || 'DRAFT';
+    return statusFilter === 'all' || status === statusFilter;
+  });
 
   const handleValidate = (id) => {
     validateDelivery(id);
@@ -40,10 +51,11 @@ const DeliveryList = () => {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           <option value="all">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="waiting">Waiting</option>
-          <option value="ready">Ready</option>
-          <option value="done">Done</option>
+          <option value="DRAFT">Draft</option>
+          <option value="WAITING">Waiting</option>
+          <option value="READY">Ready</option>
+          <option value="DONE">Done</option>
+          <option value="CANCELLED">Cancelled</option>
         </select>
       </div>
 
@@ -61,31 +73,43 @@ const DeliveryList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredDeliveries.map((delivery) => (
-                <tr key={delivery.id} data-testid={`delivery-row-${delivery.id}`} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{delivery.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{delivery.customer}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{delivery.items.length} item(s)</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`status-badge status-${delivery.status}`}>{delivery.status}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {new Date(delivery.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {delivery.status !== 'done' && (
-                      <button
-                        onClick={() => handleValidate(delivery.id)}
-                        data-testid={`validate-delivery-${delivery.id}`}
-                        className="inline-flex items-center px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-200"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Validate
-                      </button>
-                    )}
+              {filteredDeliveries.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                    No deliveries found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredDeliveries.map((delivery) => {
+                  const items = delivery.lines || delivery.items || [];
+                  const status = delivery.status || 'DRAFT';
+                  return (
+                    <tr key={delivery.id} data-testid={`delivery-row-${delivery.id}`} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{delivery.reference || delivery.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{delivery.toParty || 'N/A'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{items.length} item(s)</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`status-badge status-${status.toLowerCase()}`}>{status}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {delivery.createdAt ? new Date(delivery.createdAt).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {status !== 'DONE' && (
+                          <button
+                            onClick={() => handleValidate(delivery.id)}
+                            data-testid={`validate-delivery-${delivery.id}`}
+                            className="inline-flex items-center px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-200"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Validate
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

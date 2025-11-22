@@ -19,7 +19,6 @@ export const InventoryProvider = ({ children }) => {
   const [moves, setMoves] = useState([]);
   const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
   // Load initial data only if user is authenticated
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -53,16 +52,6 @@ export const InventoryProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-=======
-  const addProduct = (product) => {
-    const newProduct = {
-      ...product,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    };
-    setProducts([...products, newProduct]);
-    return newProduct;
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
   };
 
   // Products
@@ -84,21 +73,29 @@ export const InventoryProvider = ({ children }) => {
 
   const addProduct = async (product) => {
     try {
+      // Backend requires: name, sku, unitCost (positive number), uom (optional, defaults to 'unit')
+      if (!product.name || !product.sku) {
+        throw new Error('Product name and SKU are required');
+      }
+      if (!product.unitCost || product.unitCost <= 0) {
+        throw new Error('Unit cost must be a positive number');
+      }
+      
       const response = await productAPI.create({
         name: product.name,
         sku: product.sku,
-        unitCost: product.unitCost || product.price || 0,
-        uom: product.unit || product.uom || 'unit',
+        unitCost: parseFloat(product.unitCost),
+        uom: product.uom || product.unit || 'unit',
       });
       await loadProducts();
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to create product');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create product';
+      toast.error(errorMessage);
       throw error;
     }
   };
 
-<<<<<<< HEAD
   const updateProduct = async (id, updates) => {
     try {
       const response = await productAPI.update(id, {
@@ -241,18 +238,6 @@ export const InventoryProvider = ({ children }) => {
       if (!warehouseId) {
         throw new Error('No warehouse available');
       }
-=======
-  const addReceipt = (receipt) => {
-    const newReceipt = {
-      ...receipt,
-      id: `REC-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'draft'
-    };
-    setReceipts([...receipts, newReceipt]);
-    return newReceipt;
-  };
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
 
       // Get first location if not specified
       const warehouse = warehouses.find(w => w.id === warehouseId);
@@ -261,7 +246,6 @@ export const InventoryProvider = ({ children }) => {
         throw new Error('No location available in warehouse');
       }
 
-<<<<<<< HEAD
       const response = await operationAPI.create({
         warehouseId,
         type: 'RECEIPT',
@@ -272,22 +256,6 @@ export const InventoryProvider = ({ children }) => {
           productId: parseInt(item.productId),
           quantity: parseInt(item.quantity),
         })),
-=======
-  const validateReceipt = (id) => {
-    const receipt = receipts.find(r => r.id === id);
-    if (receipt) {
-      receipt.items.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        if (product) {
-          updateProduct(product.id, { stock: product.stock + item.quantity });
-        }
-      });
-      updateReceipt(id, { status: 'done', validatedAt: new Date().toISOString() });
-      addMoveHistory({
-        type: 'receipt',
-        referenceId: id,
-        items: receipt.items
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
       });
       
       await loadOperations();
@@ -298,7 +266,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-<<<<<<< HEAD
   // Delivery operations
   const addDelivery = async (delivery) => {
     try {
@@ -306,18 +273,6 @@ export const InventoryProvider = ({ children }) => {
       if (!warehouseId) {
         throw new Error('No warehouse available');
       }
-=======
-  const addDelivery = (delivery) => {
-    const newDelivery = {
-      ...delivery,
-      id: `DEL-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'draft'
-    };
-    setDeliveries([...deliveries, newDelivery]);
-    return newDelivery;
-  };
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
 
       const warehouse = warehouses.find(w => w.id === warehouseId);
       const fromLocationId = delivery.fromLocationId || (warehouse?.locations?.[0]?.id || null);
@@ -325,7 +280,6 @@ export const InventoryProvider = ({ children }) => {
         throw new Error('No location available in warehouse');
       }
 
-<<<<<<< HEAD
       const response = await operationAPI.create({
         warehouseId,
         type: 'DELIVERY',
@@ -336,22 +290,6 @@ export const InventoryProvider = ({ children }) => {
           productId: parseInt(item.productId),
           quantity: parseInt(item.quantity),
         })),
-=======
-  const validateDelivery = (id) => {
-    const delivery = deliveries.find(d => d.id === id);
-    if (delivery) {
-      delivery.items.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        if (product) {
-          updateProduct(product.id, { stock: Math.max(0, product.stock - item.quantity) });
-        }
-      });
-      updateDelivery(id, { status: 'done', validatedAt: new Date().toISOString() });
-      addMoveHistory({
-        type: 'delivery',
-        referenceId: id,
-        items: delivery.items
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
       });
       
       await loadOperations();
@@ -362,7 +300,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-<<<<<<< HEAD
   // Transfer operations
   const addTransfer = async (transfer) => {
     try {
@@ -378,18 +315,6 @@ export const InventoryProvider = ({ children }) => {
         const location = warehouse.locations?.find(l => l.name === locationName || `${warehouse.name} - ${l.name}` === locationString);
         return location ? { warehouseId: warehouse.id, locationId: location.id } : null;
       };
-=======
-  const addTransfer = (transfer) => {
-    const newTransfer = {
-      ...transfer,
-      id: `TRF-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'draft'
-    };
-    setTransfers([...transfers, newTransfer]);
-    return newTransfer;
-  };
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
 
       const source = parseLocation(transfer.sourceLocation);
       const destination = parseLocation(transfer.destinationLocation);
@@ -418,7 +343,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-<<<<<<< HEAD
   // Adjustment operations
   const addAdjustment = async (adjustment) => {
     try {
@@ -434,18 +358,6 @@ export const InventoryProvider = ({ children }) => {
         const location = warehouse.locations?.find(l => l.name === locationName || `${warehouse.name} - ${l.name}` === locationString);
         return location ? { warehouseId: warehouse.id, locationId: location.id } : null;
       };
-=======
-  const addAdjustment = (adjustment) => {
-    const newAdjustment = {
-      ...adjustment,
-      id: `ADJ-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'draft'
-    };
-    setAdjustments([...adjustments, newAdjustment]);
-    return newAdjustment;
-  };
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
 
       const location = parseLocation(adjustment.location);
       if (!location) {
@@ -476,7 +388,6 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-<<<<<<< HEAD
   // Operation actions (confirm, validate, cancel)
   const confirmOperation = async (id) => {
     try {
@@ -487,16 +398,6 @@ export const InventoryProvider = ({ children }) => {
       toast.error(error.response?.data?.error || 'Failed to confirm operation');
       throw error;
     }
-=======
-  const addWarehouse = (warehouse) => {
-    const newWarehouse = {
-      ...warehouse,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    };
-    setWarehouses([...warehouses, newWarehouse]);
-    return newWarehouse;
->>>>>>> f570278a8b5c01c481fbc37964756b0bf8d83a31
   };
 
   const validateOperation = async (id) => {

@@ -13,6 +13,7 @@ const CreateProduct = () => {
     sku: '',
     category: '',
     unit: 'pcs',
+    unitCost: 0,
     stock: 0,
     reorderLevel: 0,
     reorderQuantity: 0
@@ -23,21 +24,37 @@ const CreateProduct = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.sku || !formData.category) {
-      toast.error('Please fill in all required fields');
+    if (!formData.name || !formData.sku) {
+      toast.error('Please fill in Product Name and SKU');
       return;
     }
-    addProduct({
-      ...formData,
-      stock: parseInt(formData.stock),
-      reorderLevel: parseInt(formData.reorderLevel),
-      reorderQuantity: parseInt(formData.reorderQuantity),
-      locations: []
-    });
-    toast.success('Product created successfully');
-    navigate('/products');
+    
+    const unitCost = parseFloat(formData.unitCost);
+    if (isNaN(unitCost) || unitCost <= 0) {
+      toast.error('Please enter a valid unit cost (must be greater than 0)');
+      return;
+    }
+    
+    try {
+      await addProduct({
+        name: formData.name.trim(),
+        sku: formData.sku.trim(),
+        unitCost: unitCost,
+        uom: formData.unit || 'unit',
+        // Store additional fields for frontend use (not sent to backend)
+        category: formData.category,
+        stock: parseInt(formData.stock) || 0,
+        reorderLevel: parseInt(formData.reorderLevel) || 0,
+        reorderQuantity: parseInt(formData.reorderQuantity) || 0,
+        locations: []
+      });
+      toast.success('Product created successfully');
+      navigate('/products');
+    } catch (error) {
+      // Error is already handled in addProduct
+    }
   };
 
   return (
@@ -92,6 +109,22 @@ const CreateProduct = () => {
                 <option value="">Select category</option>
                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Unit Cost *</label>
+              <input
+                type="number"
+                name="unitCost"
+                value={formData.unitCost}
+                onChange={handleChange}
+                data-testid="product-unit-cost-input"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                required
+              />
             </div>
 
             <div>

@@ -5,12 +5,23 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 const AdjustmentList = () => {
-  const { adjustments, validateAdjustment } = useInventory();
+  const { adjustments, validateAdjustment, loading } = useInventory();
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredAdjustments = adjustments.filter(a =>
-    statusFilter === 'all' || a.status === statusFilter
-  );
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
+      </div>
+    );
+  }
+
+  const adjustmentsList = adjustments || [];
+  const filteredAdjustments = adjustmentsList.filter(a => {
+    if (!a) return false;
+    const status = a.status || 'DRAFT';
+    return statusFilter === 'all' || status === statusFilter;
+  });
 
   const handleValidate = (id) => {
     validateAdjustment(id);
@@ -41,8 +52,11 @@ const AdjustmentList = () => {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           <option value="all">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="done">Done</option>
+          <option value="DRAFT">Draft</option>
+          <option value="WAITING">Waiting</option>
+          <option value="READY">Ready</option>
+          <option value="DONE">Done</option>
+          <option value="CANCELLED">Cancelled</option>
         </select>
       </div>
 
@@ -63,35 +77,55 @@ const AdjustmentList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredAdjustments.map((adjustment) => (
-                <tr key={adjustment.id} data-testid={`adjustment-row-${adjustment.id}`} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{adjustment.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{adjustment.productName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{adjustment.location}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{adjustment.recordedStock}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{adjustment.countedQuantity}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-sm font-semibold ${adjustment.difference < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                      {adjustment.difference > 0 ? '+' : ''}{adjustment.difference}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`status-badge status-${adjustment.status}`}>{adjustment.status}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {adjustment.status !== 'done' && (
-                      <button
-                        onClick={() => handleValidate(adjustment.id)}
-                        data-testid={`validate-adjustment-${adjustment.id}`}
-                        className="inline-flex items-center px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-200"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Validate
-                      </button>
-                    )}
+              {filteredAdjustments.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                    No adjustments found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredAdjustments.map((adjustment) => {
+                  const status = adjustment.status || 'DRAFT';
+                  const lines = adjustment.lines || [];
+                  const firstLine = lines[0] || {};
+                  // For adjustments, we need to calculate from the operation data
+                  const productName = adjustment.productName || `Product ${firstLine.productId || 'N/A'}`;
+                  const location = adjustment.location || adjustment.toLocation?.name || adjustment.fromLocation?.name || 'N/A';
+                  const recordedStock = adjustment.recordedStock || 0;
+                  const countedQuantity = adjustment.countedQuantity || firstLine.quantity || 0;
+                  const difference = countedQuantity - recordedStock;
+                  
+                  return (
+                    <tr key={adjustment.id} data-testid={`adjustment-row-${adjustment.id}`} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{adjustment.reference || adjustment.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{productName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{location}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{recordedStock}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{countedQuantity}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`text-sm font-semibold ${difference < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                          {difference > 0 ? '+' : ''}{difference}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`status-badge status-${status.toLowerCase()}`}>{status}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {status !== 'DONE' && (
+                          <button
+                            onClick={() => handleValidate(adjustment.id)}
+                            data-testid={`validate-adjustment-${adjustment.id}`}
+                            className="inline-flex items-center px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-200"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Validate
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
